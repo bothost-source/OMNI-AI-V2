@@ -1,4 +1,4 @@
-# OMNI - German Number Bot (Pairing Code)
+# OMNI AI 
 
 WhatsApp bot using **whatsapp-web.js** with **phone number pairing code**.
 No QR code. No WhatsApp Business API needed!
