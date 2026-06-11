@@ -71,7 +71,7 @@ client.on('code', (code) => {
 client.on('ready', () => {
     console.log('[OMNI] ✅ Client is ready! Bot is running.');
     console.log(`[OMNI] 📱 Connected number: ${botInfo?.wid?.user || 'Unknown'}`);
-    console.log(`[OMNI] 🤖 AI Status: ${groq.isGroqConfigured() ? 'Groq AI ACTIVE' : 'Placeholder mode (add GROQ_API_KEY)'}`);
+    console.log(`[OMNI] 🤖 AI Status: ${groq.isConfigured() ? 'Groq AI ACTIVE' : 'Placeholder mode (add GROQ_API_KEY)'}`);
     isReady = true;
     currentPairingCode = null;
     botInfo = client.info;
@@ -164,7 +164,7 @@ function getPlaceholderResponse(userMessage, senderName = '') {
     }
 
     if (msgLower.includes('status')) {
-        return `*OMNI* 🤖\n\n📊 AI Status:\n• Connected: ${isReady ? '✅ Yes' : '❌ No'}\n• Number: ${botInfo?.wid?.user || 'Unknown'}\n• AI: ${groq.isGroqConfigured() ? '✅ Groq AI Active' : '⚠️ Placeholder mode'}\n• Platform: WhatsApp Web (Pairing Code)\n\nReady to help!`;
+        return `*OMNI* 🤖\n\n📊 AI Status:\n• Connected: ${isReady ? '✅ Yes' : '❌ No'}\n• Number: ${botInfo?.wid?.user || 'Unknown'}\n• AI: ${groq.isConfigured() ? '✅ Groq AI Active' : '⚠️ Placeholder mode'}\n• Platform: WhatsApp Web (Pairing Code)\n\nReady to help!`;
     }
 
     return `*OMNI* 🤖\n\nI received your message! Here is my response:\n\n${userMessage}\n\n⚠️ *Note:* I'm running in placeholder mode.\nAdd your GROQ_API_KEY to .env for real AI responses.\nGet free key at: https://console.groq.com/keys`;
@@ -209,7 +209,7 @@ client.on('message_create', async (msg) => {
 
         // STATUS
         if (queryLower.includes('status')) {
-            const statusMsg = groq.isGroqConfigured() 
+            const statusMsg = groq.isConfigured() 
                 ? await groq.generateGroqResponse('What is your status?', senderName) || getPlaceholderResponse('status')
                 : getPlaceholderResponse('status');
             await msg.reply(statusMsg);
@@ -219,7 +219,7 @@ client.on('message_create', async (msg) => {
         // CODE - Use Groq if available
         if (queryLower.includes('code') || queryLower.includes('python')) {
             let response;
-            if (groq.isGroqConfigured()) {
+            if (groq.isConfigured()) {
                 const language = queryLower.includes('python') ? 'Python' : 'JavaScript';
                 const task = userQuery.replace(/code|python|javascript|js/gi, '').trim() || 'hello world';
                 response = await groq.generateCodeResponse(language, task);
@@ -285,7 +285,7 @@ client.on('message_create', async (msg) => {
 
         // DEFAULT TEXT - Use Groq AI if available, else placeholder
         let responseText;
-        if (groq.isGroqConfigured()) {
+        if (groq.isConfigured()) {
             responseText = await groq.generateGroqResponse(userQuery, senderName);
         }
         if (!responseText) {
@@ -309,7 +309,7 @@ app.get('/', (req, res) => {
         version: '1.0.0',
         status: isReady ? 'connected' : 'waiting_for_pairing',
         number: botInfo?.wid?.user || 'Not connected',
-        ai_status: groq.isGroqConfigured() ? 'groq_active' : 'placeholder_mode',
+        ai_status: groq.isConfigured() ? 'groq_active' : 'placeholder_mode',
         features: ['text', 'media', 'youtube-download', 'image-generation', 'groq-ai'],
         pairing_code: currentPairingCode || null
     });
@@ -320,7 +320,7 @@ app.get('/pairing', (req, res) => {
         return res.json({
             status: 'already_connected',
             number: botInfo?.wid?.user,
-            ai: groq.isGroqConfigured() ? 'Groq AI Active' : 'Placeholder Mode',
+            ai: groq.isConfigured() ? 'Groq AI Active' : 'Placeholder Mode',
             message: 'Bot is paired and running!'
         });
     }
@@ -344,7 +344,7 @@ app.get('/api/health', (req, res) => {
         status: isReady ? 'online' : 'offline',
         bot: BOT_NAME,
         connected: isReady,
-        ai: groq.isGroqConfigured() ? 'groq' : 'placeholder',
+        ai: groq.isConfigured() ? 'groq' : 'placeholder',
         number: botInfo?.wid?.user || null,
         timestamp: new Date().toISOString()
     });
@@ -368,6 +368,6 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`[OMNI] Dashboard running on port ${PORT}`);
     console.log(`[OMNI] Check pairing status: http://localhost:${PORT}/pairing`);
-    console.log(`[OMNI] AI Mode: ${groq.isGroqConfigured() ? 'Groq AI ✅' : 'Placeholder ⚠️ (add GROQ_API_KEY)'}`);
+    console.log(`[OMNI] AI Mode: ${groq.isConfigured() ? 'Groq AI ✅' : 'Placeholder ⚠️ (add GROQ_API_KEY)'}`);
     console.log(`[OMNI] Waiting for pairing code...`);
 });
